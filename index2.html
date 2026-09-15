@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Document Assistant</title>
+
+    <!-- MathJax 3 + mhchem -->
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['\\(', '\\)']],
+          displayMath: [['\\[', '\\]']],
+          packages: {'[+]': ['mhchem']}
+        },
+        loader: {load: ['[tex]/mhchem']},
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        },
+        chtml: { scale: 1.05 }
+      };
+    </script>
+    <script async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
+    <style>
+        /* ============================================================
+           THEME — Aurora Light
+           ============================================================ */
+        * { box-sizing: border-box; }
+
+        :root {
+            --bg:            #ffffff;
+            --bg-2:          #fafbff;
+            --surface:       #ffffff;
+            --surface-2:     #f7f8fd;
+            --surface-3:     #eef0f8;
+
+            --border:        #e8ebf4;
+            --border-2:      #d8dded;
+
+            --text:          #0f172a;
+            --text-dim:      #5b6478;
+            --text-faint:    #98a0b3;
+
+            /* Aurora accent set — same as the dark version */
+            --mint:          #22c55e;
+            --mint-ink:      #15803d;
+            --mint-soft:     #e8f8ee;
+            --cyan:          #06b6d4;
+            --violet:        #8b5cf6;
+            --violet-soft:   #f1ecfe;
+            --pink:          #ec4899;
+
+            --accent:        #22c55e;
+            --accent-glow:   rgba(34, 197, 94, 0.22);
+
+            --user-bubble:   linear-gradient(135deg, #1e293b, #334155);
+            --ai-bubble:     #ffffff;
+
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.07);
+            --shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.09);
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Soft pastel aurora haze on white */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background:
+                radial-gradient(900px 500px at 10% -20%, rgba(34, 197, 94, 0.10), transparent 60%),
+                radial-gradient(800px 500px at 90% -10%, rgba(6, 182, 212, 0.10), transparent 60%),
+                radial-gradient(700px 700px at 50% 120%, rgba(139, 92, 246, 0.08), transparent 60%),
+                linear-gradient(180deg, var(--bg), var(--bg-2));
+            animation: aurora 28s ease-in-out infinite alternate;
+        }
+        @keyframes aurora {
+            0%   { transform: translate3d(0, 0, 0) scale(1); filter: hue-rotate(0deg); }
+            100% { transform: translate3d(-1.5%, 1%, 0) scale(1.04); filter: hue-rotate(15deg); }
+        }
+
+        /* Animated aurora ribbon across the top */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            z-index: 100;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                var(--mint) 15%,
+                var(--cyan) 40%,
+                var(--violet) 65%,
+                var(--pink) 85%,
+                transparent 100%);
+            background-size: 200% 100%;
+            animation: ribbon 8s linear infinite;
+            box-shadow: 0 0 16px rgba(34, 197, 94, 0.35);
+        }
+        @keyframes ribbon {
+            0%   { background-position: -100% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* ============================================================
+           LAYOUT
+           ============================================================ */
+        .app {
+            display: grid;
+            grid-template-columns: 264px 1fr;
+            height: 100vh;
+            max-width: 1240px;
+            margin: 0 auto;
+        }
+
+        /* ============================================================
+           SIDEBAR
+           ============================================================ */
+        .sidebar {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 22px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 4px 4px 18px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 4px;
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--mint-soft), #ddf3ff);
+            border: 1px solid #c8e8d4;
+            display: grid;
+            place-items: center;
+            font-size: 18px;
+            color: var(--mint-ink);
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(34, 197, 94, 0.20);
+        }
+        .brand-mark::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(34,197,94,0.25), transparent 70%);
+        }
+        .brand-name {
+            font-size: 14.5px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            line-height: 1.2;
+            color: var(--text);
+        }
+        .brand-sub {
+            font-size: 10.5px;
+            color: var(--text-faint);
+            font-weight: 500;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            font-family: 'SF Mono', Menlo, monospace;
+            margin-top: 2px;
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            background: var(--surface);
+            color: var(--mint-ink);
+            border: 1px solid #c8e8d4;
+            border-radius: 10px;
+            padding: 11px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all .18s ease;
+            font-family: inherit;
+            letter-spacing: 0.2px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .new-chat-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(34,197,94,0.10), rgba(6,182,212,0.08));
+            opacity: 0;
+            transition: opacity .2s ease;
+        }
+        .new-chat-btn:hover {
+            border-color: var(--mint);
+            box-shadow: 0 8px 22px rgba(34, 197, 94, 0.22);
+            transform: translateY(-1px);
+        }
+        .new-chat-btn:hover::before { opacity: 1; }
+
+        .side-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 14px;
+            font-size: 12.5px;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all .18s ease;
+            user-select: none;
+            font-weight: 500;
+            font-family: inherit;
+            box-shadow: var(--shadow-sm);
+        }
+        .side-toggle:hover {
+            border-color: var(--border-2);
+            background: var(--surface-2);
+            color: var(--text);
+        }
+        .side-toggle.active {
+            border-color: var(--mint);
+            background: linear-gradient(135deg, rgba(34,197,94,0.10), rgba(6,182,212,0.06));
+            color: var(--mint-ink);
+            box-shadow: 0 8px 22px rgba(34, 197, 94, 0.18);
+        }
+        #webState {
+            font-weight: 700;
+            font-size: 10.5px;
+            letter-spacing: 1px;
+            color: var(--text-faint);
+            font-family: 'SF Mono', Menlo, monospace;
+        }
+        .side-toggle.active #webState { color: var(--mint-ink); }
+
+        .side-info {
+            margin-top: auto;
+            padding: 16px 6px 4px;
+            font-size: 11px;
+            color: var(--text-faint);
+            line-height: 1.7;
+            border-top: 1px solid var(--border);
+            font-family: 'SF Mono', Menlo, monospace;
+            letter-spacing: 0.2px;
+        }
+        .side-info b { color: var(--text-dim); font-weight: 600; }
+
+        /* ============================================================
+           MAIN
+           ============================================================ */
+        .main {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-header {
+            padding: 20px 30px 16px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 2;
+        }
+        .main-title {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text);
+        }
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--mint);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15), 0 0 10px var(--mint);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%      { opacity: 0.55; }
+        }
+        .main-sub {
+            font-size: 12px;
+            color: var(--text-faint);
+            margin-top: 4px;
+            font-weight: 500;
+            font-family: 'SF Mono', Menlo, monospace;
+            letter-spacing: 0.2px;
+        }
+
+        /* ============================================================
+           THREAD
+           ============================================================ */
+        .thread {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 30px 140px;
+            scroll-behavior: smooth;
+        }
+        .thread::-webkit-scrollbar { width: 8px; }
+        .thread::-webkit-scrollbar-track { background: transparent; }
+        .thread::-webkit-scrollbar-thumb {
+            background: #dcdfe9;
+            border-radius: 8px;
+        }
+        .thread::-webkit-scrollbar-thumb:hover { background: #c4c8d4; }
+
+        /* Empty state */
+        .empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-dim);
+            animation: fade-in .5s ease;
+        }
+        .empty-icon {
+            width: 76px;
+            height: 76px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, var(--mint-soft), #ddf3ff);
+            border: 1px solid #c8e8d4;
+            display: grid;
+            place-items: center;
+            font-size: 32px;
+            color: var(--mint-ink);
+            box-shadow: 0 20px 50px rgba(34, 197, 94, 0.22);
+            margin-bottom: 22px;
+            position: relative;
+        }
+        .empty-icon::after {
+            content: "";
+            position: absolute;
+            inset: -20px;
+            border-radius: 40px;
+            background: radial-gradient(circle, rgba(34,197,94,0.12), transparent 70%);
+            z-index: -1;
+        }
+        .empty h2 {
+            font-size: 21px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: var(--text);
+            letter-spacing: -0.4px;
+        }
+        .empty p {
+            font-size: 13.5px;
+            margin: 0 0 28px;
+            max-width: 460px;
+            line-height: 1.65;
+            color: var(--text-dim);
+        }
+        .suggestions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            max-width: 560px;
+            width: 100%;
+        }
+        .suggestion {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 13px 15px;
+            font-size: 12.5px;
+            text-align: left;
+            cursor: pointer;
+            transition: all .18s ease;
+            color: var(--text-dim);
+            font-family: inherit;
+            line-height: 1.5;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .suggestion::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 2px;
+            background: var(--mint);
+            transform: scaleY(0);
+            transform-origin: center;
+            transition: transform .2s ease;
+        }
+        .suggestion:hover {
+            border-color: var(--mint);
+            color: var(--text);
+            background: var(--surface-2);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(34, 197, 94, 0.14);
+        }
+        .suggestion:hover::before { transform: scaleY(1); }
+        .suggestion b {
+            display: block;
+            color: var(--text);
+            font-weight: 600;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+        .suggestion:hover b { color: var(--mint-ink); }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============================================================
+           MESSAGES
+           ============================================================ */
+        .msg {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 24px;
+            animation: msg-in .3s ease;
+            max-width: 100%;
+        }
+        @keyframes msg-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .msg.user { flex-direction: row-reverse; }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            font-size: 15px;
+            color: #fff;
+            font-weight: 700;
+            font-family: 'SF Mono', Menlo, monospace;
+        }
+        .msg.user .avatar {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: #fff;
+            border: 1px solid #334155;
+        }
+        .msg.ai .avatar {
+            background: linear-gradient(135deg, var(--mint-soft), #ddf3ff);
+            border: 1px solid var(--mint);
+            color: var(--mint-ink);
+            box-shadow:
+                0 0 0 3px rgba(34, 197, 94, 0.08),
+                0 6px 18px rgba(34, 197, 94, 0.20);
+        }
+
+        .bubble-wrap {
+            max-width: calc(100% - 62px);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .msg.user .bubble-wrap { align-items: flex-end; }
+
+        .bubble {
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 14.5px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+            position: relative;
+        }
+        .msg.user .bubble {
+            background: var(--user-bubble);
+            color: #fff;
+            border: 1px solid #334155;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.18);
+        }
+        .msg.ai .bubble {
+            background: var(--ai-bubble);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+            color: var(--text);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Attachments */
+        .bubble-attachments {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .att-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.18);
+            color: #fff;
+            font-size: 11.5px;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.28);
+            font-family: 'SF Mono', Menlo, monospace;
+        }
+
+        .bubble-img {
+            display: block;
+            max-width: 260px;
+            max-height: 240px;
+            border-radius: 10px;
+            margin-top: 8px;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.18);
+            border: 1px solid var(--border);
+        }
+
+        /* Extract collapsible */
+        .extract-box {
+            background: #fbfcff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+        .extract-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 13px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--text-dim);
+            cursor: pointer;
+            background: #f5f7fd;
+            user-select: none;
+            transition: all .15s ease;
+            font-family: 'SF Mono', Menlo, monospace;
+            letter-spacing: 0.3px;
+        }
+        .extract-head:hover {
+            background: var(--mint-soft);
+            color: var(--mint-ink);
+        }
+        .extract-head .left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .extract-head .chev {
+            transition: transform .2s ease;
+            font-size: 10px;
+            color: var(--mint-ink);
+        }
+        .extract-box.open .chev { transform: rotate(90deg); }
+        .extract-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .3s ease;
+            font-size: 12.5px;
+            line-height: 1.65;
+            color: var(--text-dim);
+            background: #ffffff;
+            border-top: 1px solid var(--border);
+        }
+        .extract-box.open .extract-body {
+            max-height: 320px;
+            overflow-y: auto;
+        }
+        .extract-body pre {
+            margin: 0;
+            padding: 14px 16px;
+            font-family: 'SF Mono', Menlo, Consolas, monospace;
+            font-size: 11.5px;
+            line-height: 1.65;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #475069;
+        }
+
+        /* Message tools */
+        .msg-tools {
+            display: flex;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity .18s ease;
+            padding: 0 4px;
+        }
+        .msg:hover .msg-tools { opacity: 1; }
+        .tool-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 5px 11px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: 'SF Mono', Menlo, monospace;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            transition: all .15s ease;
+        }
+        .tool-btn:hover {
+            color: var(--mint-ink);
+            border-color: var(--mint);
+            background: var(--mint-soft);
+        }
+
+        /* ============================================================
+           TYPING
+           ============================================================ */
+        .typing {
+            display: inline-flex;
+            gap: 5px;
+            align-items: center;
+            padding: 4px 0;
+        }
+        .typing span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--mint);
+            animation: bounce 1.3s infinite ease-in-out;
+            opacity: 0.5;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+        }
+        .typing span:nth-child(2) { animation-delay: .18s; }
+        .typing span:nth-child(3) { animation-delay: .36s; }
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: .5; }
+            30%           { transform: translateY(-6px); opacity: 1; }
+        }
+
+        .extract-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12.5px;
+            color: var(--text-dim);
+            font-family: 'SF Mono', Menlo, monospace;
+            letter-spacing: 0.2px;
+        }
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid #e2e5f1;
+            border-top-color: var(--mint);
+            animation: spin .8s linear infinite;
+            flex-shrink: 0;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ============================================================
+           COMPOSER
+           ============================================================ */
+        .composer-wrap {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 14px 30px 24px;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.85) 30%,
+                var(--bg) 60%);
+            z-index: 3;
+        }
+        .composer {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--surface);
+            border: 1px solid var(--border-2);
+            border-radius: 16px;
+            padding: 12px 12px 12px 16px;
+            transition: border-color .2s ease, box-shadow .2s ease;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+        }
+        .composer:focus-within {
+            border-color: transparent;
+            box-shadow:
+                0 20px 50px rgba(15, 23, 42, 0.10),
+                0 0 0 1px rgba(34, 197, 94, 0.5),
+                0 0 32px rgba(34, 197, 94, 0.18);
+        }
+
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0 2px 8px;
+            min-height: 0;
+        }
+        .badge-row:empty { display: none; }
+
+        .file-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--mint-soft), #e0f2fe);
+            color: var(--mint-ink);
+            padding: 6px 12px 6px 14px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 500;
+            border: 1px solid #c8e8d4;
+            font-family: 'SF Mono', Menlo, monospace;
+            letter-spacing: 0.2px;
+        }
+        .file-badge button {
+            border: none;
+            background: rgba(34, 197, 94, 0.14);
+            color: var(--mint-ink);
+            cursor: pointer;
+            font-size: 11px;
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            display: grid;
+            place-items: center;
+            line-height: 1;
+            font-weight: 700;
+        }
+        .file-badge button:hover { background: rgba(34, 197, 94, 0.28); }
+
+        #imagePreview {
+            display: none;
+            max-width: 120px;
+            max-height: 120px;
+            margin: 0 2px 8px;
+            border-radius: 10px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+        }
+
+        .input-area {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        textarea {
+            flex: 1;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 14.5px;
+            padding: 10px 6px;
+            min-height: 32px;
+            max-height: 180px;
+            font-family: inherit;
+            background: transparent;
+            color: var(--text);
+            caret-color: var(--mint);
+            line-height: 1.55;
+        }
+        textarea::placeholder { color: var(--text-faint); }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            transition: all .18s ease;
+            background: var(--surface-2);
+            color: var(--text-dim);
+        }
+        .icon-btn:hover {
+            background: var(--mint-soft);
+            color: var(--mint-ink);
+            border-color: var(--mint);
+        }
+
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--mint);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            color: var(--mint-ink);
+            background: var(--mint-soft);
+            transition: all .18s ease;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.18);
+        }
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            background: var(--mint);
+            color: #ffffff;
+            box-shadow: 0 10px 24px rgba(34, 197, 94, 0.38);
+        }
+        .send-btn:disabled {
+            background: var(--surface-2);
+            color: var(--text-faint);
+            border-color: var(--border);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        .send-btn.stop {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: #fff;
+            border-color: #dc2626;
+            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.28);
+        }
+
+        #fileInput { display: none; }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 860px) {
+            .app { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .sidebar.open {
+                display: flex;
+                position: fixed;
+                inset: 0 auto 0 0;
+                width: 260px;
+                z-index: 100;
+                box-shadow: 20px 0 60px rgba(15, 23, 42, 0.15);
+            }
+            .thread { padding: 20px 16px 140px; }
+            .composer-wrap { padding: 10px 14px 18px; }
+            .main-header { padding: 14px 16px 12px; }
+            .suggestions { grid-template-columns: 1fr; }
+        }
+
+        .menu-btn {
+            display: none;
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 5;
+            color: var(--text-dim);
+        }
+        @media (max-width: 860px) {
+            .menu-btn { display: grid; place-items: center; }
+            .main-title { margin-left: 48px; }
+        }
+
+        /* MathJax color inside bubbles */
+        .msg.user .bubble mjx-container { color: #ffffff; }
+    </style>
+</head>
+<body>
+
+<div class="app">
+
+    <!-- ========================= SIDEBAR ========================= -->
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="brand-mark">⚗</div>
+            <div>
+                <div class="brand-name">Docs Assistant</div>
+                <div class="brand-sub">sci · ocr · vision</div>
+            </div>
+        </div>
+
+        <button class="new-chat-btn" onclick="newChat()">
+            <span>＋</span> New Chat
+        </button>
+
+        <div class="side-toggle" id="webToggle" onclick="toggleWeb()">
+            <span>🌐 &nbsp;Web Search</span>
+            <span id="webState">OFF</span>
+        </div>
+
+        <div class="side-info">
+            <b>supports</b><br>
+            → text<br>
+            → images<br>
+            → pdf (ocr + vision)<br>
+            <b>renders</b><br>
+            → mhchem equations
+        </div>
+    </aside>
+
+    <!-- ========================= MAIN ========================= -->
+    <main class="main">
+
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+
+        <div class="main-header">
+            <div class="main-title">
+                <span class="status-dot"></span>
+                AI Document Assistant
+            </div>
+            <div class="main-sub">// upload a chemistry PDF or image — equations come back rendered</div>
+        </div>
+
+        <div class="thread" id="thread">
+            <!-- messages injected here -->
+        </div>
+
+        <div class="composer-wrap">
+            <div class="composer">
+                <img id="imagePreview" alt="preview">
+                <div id="badgeRow" class="badge-row"></div>
+
+                <div class="input-area">
+                    <button type="button" class="icon-btn"
+                            onclick="document.getElementById('fileInput').click()"
+                            title="Attach image or PDF">📎</button>
+
+                    <input id="fileInput" type="file"
+                           accept="image/*,application/pdf"
+                           onchange="handleFileSelect()">
+
+                    <textarea id="query"
+                              placeholder="Ask anything, or drop a chemistry PDF / image to extract equations…"
+                              rows="1"></textarea>
+
+                    <button id="sendBtn" class="send-btn" onclick="sendMessage()" title="Send">➤</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // ============================================================
+    // STATE
+    // ============================================================
+    let conversationId = null;
+    let webSearch = false;
+    let attachedFile = null;
+    let isGenerating = false;
+    let abortController = null;
+
+    const fileInput = document.getElementById('fileInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const badgeRow = document.getElementById('badgeRow');
+    const thread = document.getElementById('thread');
+    const sendBtn = document.getElementById('sendBtn');
+    const queryInput = document.getElementById('query');
+    const webToggle = document.getElementById('webToggle');
+    const webState = document.getElementById('webState');
+    const sidebar = document.getElementById('sidebar');
+
+    // ============================================================
+    // UTIL
+    // ============================================================
+    function escapeHtml(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function renderMathInto(el) {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([el]).catch(err => console.error(err));
+        }
+    }
+
+    function scrollToBottom() {
+        requestAnimationFrame(() => {
+            thread.scrollTop = thread.scrollHeight;
+        });
+    }
+
+    function toggleSidebar() { sidebar.classList.toggle('open'); }
+
+    function toggleWeb() {
+        webSearch = !webSearch;
+        webState.textContent = webSearch ? 'ON' : 'OFF';
+        webToggle.classList.toggle('active', webSearch);
+    }
+
+    // ============================================================
+    // ATTACHMENTS
+    // ============================================================
+    function handleFileSelect() {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const isImage = file.type.startsWith('image/');
+        const isPDF = file.type === 'application/pdf'
+                      || file.name.toLowerCase().endsWith('.pdf');
+
+        if (!isImage && !isPDF) {
+            alert('Only images and PDFs are supported.');
+            fileInput.value = '';
+            return;
+        }
+
+        attachedFile = file;
+        imagePreview.style.display = 'none';
+        badgeRow.innerHTML = '';
+
+        if (isImage) {
+            imagePreview.src = URL.createObjectURL(file);
+            imagePreview.style.display = 'block';
+        }
+
+        const badge = document.createElement('div');
+        badge.className = 'file-badge';
+        badge.innerHTML = `${isImage ? '🖼' : '📄'} ${escapeHtml(file.name)}
+            <button onclick="clearAttachment()" title="Remove">✕</button>`;
+        badgeRow.appendChild(badge);
+    }
+
+    function clearAttachment() {
+        attachedFile = null;
+        fileInput.value = '';
+        imagePreview.style.display = 'none';
+        imagePreview.src = '';
+        badgeRow.innerHTML = '';
+    }
+
+    // ============================================================
+    // THREAD RENDERING
+    // ============================================================
+    function renderEmptyState() {
+        thread.innerHTML = `
+            <div class="empty" id="emptyState">
+                <div class="empty-icon">⚗</div>
+                <h2>How can I help with your document?</h2>
+                <p>Upload a chemistry PDF, a photo of a textbook page, or just ask a question. Equations render properly with mhchem.</p>
+                <div class="suggestions">
+                    <button class="suggestion" onclick="useSuggestion(this)">
+                        <b>Extract equations</b>Pull every chemical equation from an uploaded PDF
+                    </button>
+                    <button class="suggestion" onclick="useSuggestion(this)">
+                        <b>Explain a reaction</b>Walk me through the mechanism step by step
+                    </button>
+                    <button class="suggestion" onclick="useSuggestion(this)">
+                        <b>Balance an equation</b>Balance and show states of matter
+                    </button>
+                    <button class="suggestion" onclick="useSuggestion(this)">
+                        <b>Summarise a chapter</b>Give me the key points from this PDF
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    function useSuggestion(btn) {
+        const title = btn.querySelector('b').textContent.trim();
+        queryInput.value = title + ': ';
+        queryInput.focus();
+        queryInput.style.height = 'auto';
+        queryInput.style.height = Math.min(queryInput.scrollHeight, 180) + 'px';
+    }
+
+    function removeEmptyState() {
+        const e = document.getElementById('emptyState');
+        if (e) e.remove();
+    }
+
+    function addUserMessage(text, attachment) {
+        removeEmptyState();
+        const msg = document.createElement('div');
+        msg.className = 'msg user';
+
+        let attachHtml = '';
+        if (attachment) {
+            attachHtml = `<div class="bubble-attachments">
+                <span class="att-chip">${attachment.isImage ? '🖼' : '📄'} ${escapeHtml(attachment.name)}</span>
+            </div>`;
+            if (attachment.isImage && attachment.previewUrl) {
+                attachHtml += `<img class="bubble-img" src="${attachment.previewUrl}" alt="">`;
+            }
+        }
+
+        msg.innerHTML = `
+            <div class="avatar">›_</div>
+            <div class="bubble-wrap">
+                <div class="bubble">${escapeHtml(text).replace(/\n/g, '<br>')}${attachHtml}</div>
+            </div>
+        `;
+        thread.appendChild(msg);
+        scrollToBottom();
+    }
+
+    function addAIMessage() {
+        removeEmptyState();
+        const msg = document.createElement('div');
+        msg.className = 'msg ai';
+        msg.innerHTML = `
+            <div class="avatar">⚗</div>
+            <div class="bubble-wrap">
+                <div class="bubble" id="currentBubble">
+                    <div class="typing">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+                <div class="msg-tools" id="currentTools" style="display:none;">
+                    <button class="tool-btn" onclick="copyCurrent()">📋 copy</button>
+                </div>
+            </div>
+        `;
+        thread.appendChild(msg);
+        scrollToBottom();
+        return msg;
+    }
+
+    function setAIBubbleStatus(text) {
+        const bubble = document.getElementById('currentBubble');
+        if (!bubble) return;
+        bubble.innerHTML = `
+            <div class="extract-status">
+                <span class="spinner"></span>
+                <span>${escapeHtml(text)}</span>
+            </div>
+        `;
+        scrollToBottom();
+    }
+
+    function setAIBubbleContent(html, rawText) {
+        const bubble = document.getElementById('currentBubble');
+        if (!bubble) return;
+        bubble.innerHTML = html;
+        bubble.dataset.raw = rawText || '';
+        renderMathInto(bubble);
+        document.getElementById('currentTools').style.display = 'flex';
+        scrollToBottom();
+    }
+
+    function setAIBubbleError(text) {
+        const bubble = document.getElementById('currentBubble');
+        if (!bubble) return;
+        bubble.innerHTML = `<div style="color:#dc2626;">✗ ${escapeHtml(text)}</div>`;
+        scrollToBottom();
+    }
+
+    function copyCurrent() {
+        const bubble = document.getElementById('currentBubble');
+        if (!bubble) return;
+        const text = bubble.dataset.raw || bubble.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.querySelector('#currentTools .tool-btn');
+            if (btn) {
+                const old = btn.textContent;
+                btn.textContent = '✓ copied';
+                setTimeout(() => btn.textContent = old, 1400);
+            }
+        });
+    }
+
+    function makeExtractBox(label, content) {
+        const safe = escapeHtml(content || '(empty)');
+        const id = 'ex-' + Math.random().toString(36).slice(2, 9);
+        return `
+            <div class="extract-box" id="${id}">
+                <div class="extract-head" onclick="document.getElementById('${id}').classList.toggle('open')">
+                    <span class="left">▸ ${escapeHtml(label)}</span>
+                    <span class="chev">▶</span>
+                </div>
+                <div class="extract-body"><pre>${safe}</pre></div>
+            </div>
+        `;
+    }
+
+    // ============================================================
+    // SEND
+    // ============================================================
+    async function sendMessage() {
+        const query = queryInput.value.trim();
+
+        if (!query && !attachedFile) { queryInput.focus(); return; }
+        if (isGenerating) return;
+
+        isGenerating = true;
+        setSendState('stop');
+
+        const attachmentSnapshot = attachedFile ? {
+            name: attachedFile.name,
+            isImage: attachedFile.type.startsWith('image/'),
+            previewUrl: attachedFile.type.startsWith('image/')
+                ? URL.createObjectURL(attachedFile)
+                : null,
+            file: attachedFile,
+        } : null;
+
+        const userText = query || 'Extract and format every chemical formula and equation in the document.';
+
+        addUserMessage(userText, attachmentSnapshot);
+        queryInput.value = '';
+        queryInput.style.height = 'auto';
+
+        addAIMessage();
+        abortController = new AbortController();
+
+        try {
+            let extractedPreview = null;
+
+            if (attachmentSnapshot) {
+                clearAttachment();
+                setAIBubbleStatus('extracting document…');
+
+                const fd = new FormData();
+                fd.append('file', attachmentSnapshot.file);
+                if (conversationId) fd.append('conversation_id', conversationId);
+
+                const upRes = await fetch('/upload', {
+                    method: 'POST',
+                    body: fd,
+                    signal: abortController.signal,
+                });
+                const upData = await upRes.json();
+
+                if (upData.error) {
+                    setAIBubbleError(upData.error);
+                    return;
+                }
+
+                conversationId = upData.conversation_id;
+                extractedPreview = upData.text || '';
+                setAIBubbleStatus('reading document…');
+            }
+
+            setAIBubbleStatus('thinking…');
+
+            const payload = {
+                message: userText,
+                conversation_id: conversationId,
+                web_search: webSearch,
+            };
+
+            const chatRes = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                signal: abortController.signal,
+            });
+            const chatData = await chatRes.json();
+
+            if (chatData.error) {
+                setAIBubbleError(chatData.error);
+                return;
+            }
+
+            conversationId = chatData.conversation_id;
+            const answer = chatData.answer || '';
+
+            let html = escapeHtml(answer).replace(/\n/g, '<br>');
+
+            if (extractedPreview && extractedPreview.trim().length > 0) {
+                html += makeExtractBox(
+                    'extracted text from document',
+                    extractedPreview.length > 4000
+                        ? extractedPreview.slice(0, 4000) + '\n…[truncated]'
+                        : extractedPreview
+                );
+            }
+
+            setAIBubbleContent(html, answer);
+
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                setAIBubbleError('generation stopped by user.');
+            } else {
+                console.error(err);
+                setAIBubbleError('Something went wrong. Please try again.');
+            }
+        } finally {
+            isGenerating = false;
+            abortController = null;
+            setSendState('send');
+        }
+    }
+
+    function setSendState(mode) {
+        if (mode === 'stop') {
+            sendBtn.classList.add('stop');
+            sendBtn.innerHTML = '⏹';
+            sendBtn.disabled = false;
+            sendBtn.onclick = stopGeneration;
+        } else {
+            sendBtn.classList.remove('stop');
+            sendBtn.innerHTML = '➤';
+            sendBtn.disabled = false;
+            sendBtn.onclick = sendMessage;
+        }
+    }
+
+    function stopGeneration() {
+        if (abortController) abortController.abort();
+    }
+
+    async function newChat() {
+        try {
+            const res = await fetch('/new-chat', { method: 'POST' });
+            const data = await res.json();
+            conversationId = data.conversation_id;
+        } catch (e) { console.warn('New chat failed:', e); }
+        clearAttachment();
+        queryInput.value = '';
+        queryInput.style.height = 'auto';
+        renderEmptyState();
+    }
+
+    queryInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    queryInput.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 180) + 'px';
+    });
+
+    (async () => {
+        try {
+            const res = await fetch('/new-chat', { method: 'POST' });
+            const data = await res.json();
+            conversationId = data.conversation_id;
+        } catch (e) { console.warn('Init failed.'); }
+        renderEmptyState();
+    })();
+</script>
+</body>
+</html>

@@ -44,7 +44,6 @@
             --text-dim:      #5b6478;
             --text-faint:    #98a0b3;
 
-            /* Aurora accent set — same as the dark version */
             --mint:          #22c55e;
             --mint-ink:      #15803d;
             --mint-soft:     #e8f8ee;
@@ -74,7 +73,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Soft pastel aurora haze on white */
         body::before {
             content: "";
             position: fixed;
@@ -92,7 +90,6 @@
             100% { transform: translate3d(-1.5%, 1%, 0) scale(1.04); filter: hue-rotate(15deg); }
         }
 
-        /* Animated aurora ribbon across the top */
         body::after {
             content: "";
             position: fixed;
@@ -115,9 +112,6 @@
             100% { background-position: 200% 0; }
         }
 
-        /* ============================================================
-           LAYOUT
-           ============================================================ */
         .app {
             display: grid;
             grid-template-columns: 264px 1fr;
@@ -126,9 +120,6 @@
             margin: 0 auto;
         }
 
-        /* ============================================================
-           SIDEBAR
-           ============================================================ */
         .sidebar {
             background: var(--surface);
             border-right: 1px solid var(--border);
@@ -272,9 +263,6 @@
         }
         .side-info b { color: var(--text-dim); font-weight: 600; }
 
-        /* ============================================================
-           MAIN
-           ============================================================ */
         .main {
             display: flex;
             flex-direction: column;
@@ -321,9 +309,6 @@
             letter-spacing: 0.2px;
         }
 
-        /* ============================================================
-           THREAD
-           ============================================================ */
         .thread {
             flex: 1;
             overflow-y: auto;
@@ -338,7 +323,6 @@
         }
         .thread::-webkit-scrollbar-thumb:hover { background: #c4c8d4; }
 
-        /* Empty state */
         .empty {
             display: flex;
             flex-direction: column;
@@ -440,9 +424,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ============================================================
-           MESSAGES
-           ============================================================ */
         .msg {
             display: flex;
             gap: 14px;
@@ -514,7 +495,6 @@
             box-shadow: var(--shadow-sm);
         }
 
-        /* Attachments */
         .bubble-attachments {
             display: flex;
             flex-wrap: wrap;
@@ -545,7 +525,6 @@
             border: 1px solid var(--border);
         }
 
-        /* Extract collapsible */
         .extract-box {
             background: #fbfcff;
             border: 1px solid var(--border);
@@ -608,7 +587,6 @@
             color: #475069;
         }
 
-        /* Message tools */
         .msg-tools {
             display: flex;
             gap: 6px;
@@ -639,9 +617,6 @@
             background: var(--mint-soft);
         }
 
-        /* ============================================================
-           TYPING
-           ============================================================ */
         .typing {
             display: inline-flex;
             gap: 5px;
@@ -684,9 +659,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ============================================================
-           COMPOSER
-           ============================================================ */
         .composer-wrap {
             position: absolute;
             bottom: 0;
@@ -847,9 +819,6 @@
 
         #fileInput { display: none; }
 
-        /* ============================================================
-           RESPONSIVE
-           ============================================================ */
         @media (max-width: 860px) {
             .app { grid-template-columns: 1fr; }
             .sidebar { display: none; }
@@ -887,8 +856,228 @@
             .main-title { margin-left: 48px; }
         }
 
-        /* MathJax color inside bubbles */
         .msg.user .bubble mjx-container { color: #ffffff; }
+        /* ============================================================
+   MODERN BRAND BLOCK
+   ============================================================ */
+
+.brand {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    margin: 0 0 10px;
+    border-radius: 16px;
+    background:
+        linear-gradient(135deg,
+            rgba(240, 253, 244, 0.9) 0%,
+            rgba(236, 254, 255, 0.9) 50%,
+            rgba(245, 243, 255, 0.9) 100%);
+    border: 1px solid rgba(34, 197, 94, 0.18);
+    overflow: hidden;
+    isolation: isolate;
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 8px 24px rgba(34, 197, 94, 0.08);
+}
+
+/* Animated aurora sweep across the card */
+.brand::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(34, 197, 94, 0.35) 60deg,
+        rgba(6, 182, 212, 0.35) 120deg,
+        rgba(139, 92, 246, 0.35) 180deg,
+        transparent 240deg,
+        transparent 360deg
+    );
+    z-index: -1;
+    opacity: 0;
+    transition: opacity .5s ease;
+    animation: brand-rotate 6s linear infinite;
+}
+
+.brand:hover::before { opacity: 1; }
+
+@keyframes brand-rotate {
+    to { transform: rotate(360deg); }
+}
+
+/* Soft inner sheen */
+.brand::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.65),
+        transparent
+    );
+    transform: skewX(-20deg);
+    animation: brand-shimmer 4.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes brand-shimmer {
+    0%, 70%  { left: -60%; }
+    100%     { left: 120%; }
+}
+
+/* ------------------------------------------------------------
+   LOGO MARK
+   ------------------------------------------------------------ */
+
+.brand-mark {
+    position: relative;
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #22c55e 0%, #06b6d4 55%, #8b5cf6 100%);
+    box-shadow:
+        0 10px 24px rgba(34, 197, 94, 0.35),
+        0 4px 10px rgba(6, 182, 212, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    transform: rotate(-4deg);
+    transition: transform .35s cubic-bezier(.2,.8,.2,1);
+}
+
+.brand:hover .brand-mark {
+    transform: rotate(0deg) scale(1.05);
+}
+
+/* Glyph */
+.brand-mark-inner {
+    font-size: 22px;
+    color: #ffffff;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+    z-index: 2;
+    position: relative;
+    animation: brand-float 3.5s ease-in-out infinite;
+}
+
+@keyframes brand-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-2px); }
+}
+
+/* Outer glow pulse */
+.brand-mark-glow {
+    position: absolute;
+    inset: -8px;
+    border-radius: 20px;
+    background: radial-gradient(
+        circle,
+        rgba(34, 197, 94, 0.45),
+        transparent 70%
+    );
+    filter: blur(8px);
+    z-index: 0;
+    animation: brand-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes brand-pulse {
+    0%, 100% { opacity: .55; transform: scale(1); }
+    50%      { opacity: 1;   transform: scale(1.12); }
+}
+
+/* Rotating ring */
+.brand-mark-ring {
+    position: absolute;
+    inset: -6px;
+    border-radius: 18px;
+    border: 1.5px dashed rgba(34, 197, 94, 0.45);
+    animation: brand-ring-spin 12s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes brand-ring-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ------------------------------------------------------------
+   TEXT
+   ------------------------------------------------------------ */
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.brand-name {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    line-height: 1.15;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Gradient "SKR" */
+.brand-name-gradient {
+    background: linear-gradient(135deg, #15803d 0%, #0891b2 60%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 900;
+    letter-spacing: -0.6px;
+}
+
+.brand-name-rest {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.brand-sub {
+    font-size: 10px;
+    color: #16a34a;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    text-transform: uppercase;
+    font-family: 'SF Mono', Menlo, monospace;
+    margin-top: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 168px;
+}
+
+/* Live green dot */
+.brand-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow:
+        0 0 0 3px rgba(34, 197, 94, 0.18),
+        0 0 10px rgba(34, 197, 94, 0.8);
+    animation: brand-dot-pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes brand-dot-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.4; }
+}
     </style>
 </head>
 <body>
@@ -897,13 +1086,24 @@
 
     <!-- ========================= SIDEBAR ========================= -->
     <aside class="sidebar" id="sidebar">
-        <div class="brand">
-            <div class="brand-mark">⚗</div>
-            <div>
-                <div class="brand-name">Doc Assistant</div>
-                <div class="brand-sub">sci · ocr · vision</div>
-            </div>
+       <div class="brand">
+    <div class="brand-mark">
+        <span class="brand-mark-glow"></span>
+        <span class="brand-mark-inner">⚗</span>
+        <span class="brand-mark-ring"></span>
+    </div>
+
+    <div class="brand-text">
+        <div class="brand-name">
+            <span class="brand-name-gradient">SKR</span>
+            <span class="brand-name-rest"> SENIOR</span>
         </div>
+        <div class="brand-sub">
+            <span class="brand-dot"></span>
+            Software &amp; Application <br>Developer
+        </div>
+    </div>
+</div>
 
         <button class="new-chat-btn" onclick="newChat()">
             <span>＋</span> New Chat
@@ -932,9 +1132,9 @@
         <div class="main-header">
             <div class="main-title">
                 <span class="status-dot"></span>
-                AI Document Assistant
+                AI Assistant
             </div>
-            <div class="main-sub">// upload a chemistry PDF or image — equations come back rendered</div>
+            <div class="main-sub">// Upload a PDF or image — extract the text from it and render it correctly.</div>
         </div>
 
         <div class="thread" id="thread">
@@ -1122,6 +1322,9 @@
         scrollToBottom();
     }
 
+    // ============================================================
+    // AI MESSAGE (per-message references — no shared IDs)
+    // ============================================================
     function addAIMessage() {
         removeEmptyState();
         const msg = document.createElement('div');
@@ -1129,23 +1332,37 @@
         msg.innerHTML = `
             <div class="avatar">⚗</div>
             <div class="bubble-wrap">
-                <div class="bubble" id="currentBubble">
+                <div class="bubble">
                     <div class="typing">
                         <span></span><span></span><span></span>
                     </div>
                 </div>
-                <div class="msg-tools" id="currentTools" style="display:none;">
-                    <button class="tool-btn" onclick="copyCurrent()">📋 copy</button>
+                <div class="msg-tools" style="display:none;">
+                    <button class="tool-btn">📋 copy</button>
                 </div>
             </div>
         `;
+
+        const bubble = msg.querySelector('.bubble');
+        const tools  = msg.querySelector('.msg-tools');
+        const copyBtn = msg.querySelector('.tool-btn');
+
+        copyBtn.addEventListener('click', () => {
+            const text = bubble.dataset.raw || bubble.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const old = copyBtn.textContent;
+                copyBtn.textContent = '✓ copied';
+                setTimeout(() => { copyBtn.textContent = old; }, 1400);
+            });
+        });
+
         thread.appendChild(msg);
         scrollToBottom();
-        return msg;
+
+        return { bubble, tools, msg };
     }
 
-    function setAIBubbleStatus(text) {
-        const bubble = document.getElementById('currentBubble');
+    function setAIBubbleStatus(bubble, text) {
         if (!bubble) return;
         bubble.innerHTML = `
             <div class="extract-status">
@@ -1156,35 +1373,19 @@
         scrollToBottom();
     }
 
-    function setAIBubbleContent(html, rawText) {
-        const bubble = document.getElementById('currentBubble');
+    function setAIBubbleContent(bubble, toolsEl, html, rawText) {
         if (!bubble) return;
         bubble.innerHTML = html;
         bubble.dataset.raw = rawText || '';
         renderMathInto(bubble);
-        document.getElementById('currentTools').style.display = 'flex';
+        if (toolsEl) toolsEl.style.display = 'flex';
         scrollToBottom();
     }
 
-    function setAIBubbleError(text) {
-        const bubble = document.getElementById('currentBubble');
+    function setAIBubbleError(bubble, text) {
         if (!bubble) return;
         bubble.innerHTML = `<div style="color:#dc2626;">✗ ${escapeHtml(text)}</div>`;
         scrollToBottom();
-    }
-
-    function copyCurrent() {
-        const bubble = document.getElementById('currentBubble');
-        if (!bubble) return;
-        const text = bubble.dataset.raw || bubble.innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            const btn = document.querySelector('#currentTools .tool-btn');
-            if (btn) {
-                const old = btn.textContent;
-                btn.textContent = '✓ copied';
-                setTimeout(() => btn.textContent = old, 1400);
-            }
-        });
     }
 
     function makeExtractBox(label, content) {
@@ -1228,7 +1429,8 @@
         queryInput.value = '';
         queryInput.style.height = 'auto';
 
-        addAIMessage();
+        // ⬇️ Capture THIS message's bubble + tools by reference
+        const { bubble, tools } = addAIMessage();
         abortController = new AbortController();
 
         try {
@@ -1236,7 +1438,7 @@
 
             if (attachmentSnapshot) {
                 clearAttachment();
-                setAIBubbleStatus('extracting document…');
+                setAIBubbleStatus(bubble, 'extracting document…');
 
                 const fd = new FormData();
                 fd.append('file', attachmentSnapshot.file);
@@ -1250,16 +1452,16 @@
                 const upData = await upRes.json();
 
                 if (upData.error) {
-                    setAIBubbleError(upData.error);
+                    setAIBubbleError(bubble, upData.error);
                     return;
                 }
 
                 conversationId = upData.conversation_id;
                 extractedPreview = upData.text || '';
-                setAIBubbleStatus('reading document…');
+                setAIBubbleStatus(bubble, 'reading document…');
             }
 
-            setAIBubbleStatus('thinking…');
+            setAIBubbleStatus(bubble, 'thinking…');
 
             const payload = {
                 message: userText,
@@ -1276,7 +1478,7 @@
             const chatData = await chatRes.json();
 
             if (chatData.error) {
-                setAIBubbleError(chatData.error);
+                setAIBubbleError(bubble, chatData.error);
                 return;
             }
 
@@ -1294,14 +1496,14 @@
                 );
             }
 
-            setAIBubbleContent(html, answer);
+            setAIBubbleContent(bubble, tools, html, answer);
 
         } catch (err) {
             if (err.name === 'AbortError') {
-                setAIBubbleError('generation stopped by user.');
+                setAIBubbleError(bubble, 'generation stopped by user.');
             } else {
                 console.error(err);
-                setAIBubbleError('Something went wrong. Please try again.');
+                setAIBubbleError(bubble, 'Something went wrong. Please try again.');
             }
         } finally {
             isGenerating = false;
