@@ -8,7 +8,7 @@ import uuid
 import fitz  # PyMuPDF
 from PIL import Image
 import numpy as np
-
+import os
 # =========================================================
 # OCR ENGINE
 # =========================================================
@@ -46,7 +46,8 @@ except ImportError:
 load_dotenv()
 
 app = Flask(__name__)
-client = OpenAI()
+# client = OpenAI()
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 conversations = {}
 
 MAX_CHARS = 100000
