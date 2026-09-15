@@ -1,0 +1,3 @@
+pip install flask openai python-dotenv PyPDF2 PyMuPDF
+
+pip install rapidocr-onnxruntime pillow
