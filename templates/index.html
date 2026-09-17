@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes, viewport-fit=cover">
   <title>AI Smart Assistant</title>
 
   <!-- MathJax 3 + mhchem -->
@@ -24,7 +24,7 @@
 
   <style>
     /* ============================================================
-       THEME — White + Blue Gradient (refined)
+       THEME — White + Blue Gradient
        ============================================================ */
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -50,7 +50,6 @@
 
       --accent:         #2563eb;
       --accent-soft:    rgba(37, 99, 235, 0.08);
-      --accent-glow:    rgba(37, 99, 235, 0.25);
 
       --user-bubble:    linear-gradient(135deg, #1e40af, #2563eb);
       --ai-bubble:      #ffffff;
@@ -58,20 +57,27 @@
       --shadow-sm: 0 1px 3px rgba(30, 64, 175, 0.06);
       --shadow-md: 0 8px 24px rgba(30, 64, 175, 0.08);
       --shadow-lg: 0 20px 50px rgba(30, 64, 175, 0.12);
-      --shadow-xl: 0 24px 60px rgba(30, 64, 175, 0.16);
 
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 18px;
     }
 
-    html, body {
+    html {
+      height: 100%;
+      /* Fix for iOS: prevent overscroll bounce affecting layout */
+      overscroll-behavior: none;
+    }
+
+    body {
       height: 100%;
       font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: var(--bg-white);
       color: var(--text-primary);
       -webkit-font-smoothing: antialiased;
       overflow: hidden;
+      /* Prevent iOS rubber-band */
+      overscroll-behavior: none;
     }
 
     /* ---- soft blue gradient background ---- */
@@ -122,6 +128,7 @@
       display: grid;
       grid-template-columns: 280px 1fr;
       height: 100vh;
+      height: 100dvh; /* Dynamic viewport height — accounts for mobile browser chrome */
       max-width: 1440px;
       margin: 0 auto;
       background: transparent;
@@ -129,7 +136,7 @@
 
     /* ---------- SIDEBAR ---------- */
     .sidebar {
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-right: 1px solid var(--border-light);
@@ -140,9 +147,10 @@
       overflow-y: auto;
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 300;
+      -webkit-overflow-scrolling: touch;
     }
 
-    /* ---------- SIDEBAR CLOSE BUTTON (mobile) ---------- */
+    /* ---------- SIDEBAR CLOSE BUTTON ---------- */
     .sidebar-close {
       display: none;
       position: absolute;
@@ -234,8 +242,6 @@
       transition: all 0.2s ease;
       font-family: inherit;
       letter-spacing: 0.3px;
-      position: relative;
-      overflow: hidden;
       box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
     }
 
@@ -304,6 +310,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      height: 100dvh; /* Dynamic viewport height */
       position: relative;
       overflow: hidden;
       background: transparent;
@@ -313,7 +320,7 @@
     .main-header {
       padding: 22px 36px 18px;
       border-bottom: 1px solid var(--border-light);
-      background: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       z-index: 2;
@@ -361,6 +368,8 @@
       padding: 32px 36px 160px;
       scroll-behavior: smooth;
       position: relative;
+      min-height: 0;
+      -webkit-overflow-scrolling: touch;
     }
 
     .thread::-webkit-scrollbar { width: 8px; }
@@ -590,77 +599,6 @@
       border: 1px solid var(--border-light);
     }
 
-    /* ---------- EXTRACT BOX ---------- */
-    .extract-box {
-      background: var(--bg-soft);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-md);
-      margin-top: 14px;
-      overflow: hidden;
-    }
-
-    .extract-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      cursor: pointer;
-      background: var(--bg-elevated);
-      user-select: none;
-      transition: all 0.2s ease;
-      font-family: 'SF Mono', monospace;
-      letter-spacing: 0.4px;
-    }
-
-    .extract-head:hover {
-      background: rgba(37, 99, 235, 0.06);
-      color: var(--blue-2);
-    }
-
-    .extract-head .left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .extract-head .chev {
-      transition: transform 0.25s ease;
-      font-size: 10px;
-      color: var(--blue-2);
-    }
-
-    .extract-box.open .chev { transform: rotate(90deg); }
-
-    .extract-body {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
-      font-size: 12.5px;
-      line-height: 1.7;
-      color: var(--text-secondary);
-      background: #ffffff;
-      border-top: 1px solid var(--border-light);
-    }
-
-    .extract-box.open .extract-body {
-      max-height: 340px;
-      overflow-y: auto;
-    }
-
-    .extract-body pre {
-      margin: 0;
-      padding: 16px 18px;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 11.5px;
-      line-height: 1.7;
-      white-space: pre-wrap;
-      word-break: break-word;
-      color: #334155;
-    }
-
     /* ---------- MESSAGE TOOLS ---------- */
     .msg-tools {
       display: flex;
@@ -685,7 +623,6 @@
       gap: 6px;
       font-family: 'SF Mono', monospace;
       font-weight: 500;
-      letter-spacing: 0.3px;
       transition: all 0.18s ease;
     }
 
@@ -711,7 +648,6 @@
       background: var(--blue-3);
       animation: bounceBlue 1.4s infinite ease-in-out;
       opacity: 0.4;
-      box-shadow: 0 0 14px rgba(37, 99, 235, 0.5);
     }
 
     .typing span:nth-child(2) { animation-delay: 0.18s; }
@@ -730,7 +666,6 @@
       font-size: 13px;
       color: var(--text-secondary);
       font-family: 'SF Mono', monospace;
-      letter-spacing: 0.3px;
     }
 
     .spinner {
@@ -745,17 +680,15 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ---------- COMPOSER ---------- */
+    /* ============================================================
+       COMPOSER — the crucial fix
+       ============================================================ */
     .composer-wrap {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 16px 36px 28px;
-      background: linear-gradient(180deg,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.9) 35%,
-        #ffffff 65%);
+      position: relative; /* Changed from absolute — works with flex layout */
+      flex-shrink: 0;
+      padding: 12px 36px 20px;
+      background: #ffffff;
+      border-top: 1px solid var(--border-light);
       z-index: 3;
     }
 
@@ -765,25 +698,24 @@
       background: #ffffff;
       border: 1px solid var(--border-mid);
       border-radius: var(--radius-lg);
-      padding: 14px 14px 14px 18px;
+      padding: 10px 12px 10px 16px;
       transition: border-color 0.25s ease, box-shadow 0.25s ease;
       position: relative;
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-md);
     }
 
     .composer:focus-within {
       border-color: var(--blue-3);
       box-shadow:
-        0 24px 60px rgba(37, 99, 235, 0.12),
-        0 0 0 3px rgba(37, 99, 235, 0.08),
-        0 0 48px rgba(37, 99, 235, 0.08);
+        0 12px 32px rgba(37, 99, 235, 0.12),
+        0 0 0 3px rgba(37, 99, 235, 0.08);
     }
 
     .badge-row {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      padding: 0 2px 10px;
+      padding: 0 2px 8px;
       min-height: 0;
     }
 
@@ -795,13 +727,12 @@
       gap: 8px;
       background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(96, 165, 250, 0.06));
       color: var(--blue-2);
-      padding: 7px 14px 7px 16px;
+      padding: 6px 12px 6px 14px;
       border-radius: var(--radius-sm);
       font-size: 12px;
       font-weight: 500;
       border: 1px solid rgba(37, 99, 235, 0.2);
       font-family: 'SF Mono', monospace;
-      letter-spacing: 0.3px;
     }
 
     .file-badge button {
@@ -817,16 +748,15 @@
       place-items: center;
       line-height: 1;
       font-weight: 700;
-      transition: background 0.15s ease;
     }
 
     .file-badge button:hover { background: rgba(37, 99, 235, 0.2); }
 
     #imagePreview {
       display: none;
-      max-width: 130px;
-      max-height: 130px;
-      margin: 0 2px 10px;
+      max-width: 120px;
+      max-height: 120px;
+      margin: 0 2px 8px;
       border-radius: var(--radius-md);
       box-shadow: var(--shadow-md);
       border: 1px solid var(--border-light);
@@ -835,7 +765,7 @@
     .input-area {
       display: flex;
       align-items: flex-end;
-      gap: 12px;
+      gap: 8px;
     }
 
     textarea {
@@ -843,29 +773,29 @@
       border: none;
       outline: none;
       resize: none;
-      font-size: 15px;
-      padding: 10px 6px;
-      min-height: 34px;
-      max-height: 180px;
+      font-size: 16px; /* Prevents iOS zoom on focus */
+      padding: 10px 4px;
+      min-height: 32px;
+      max-height: 160px;
       font-family: inherit;
       background: transparent;
       color: var(--text-primary);
       caret-color: var(--blue-2);
-      line-height: 1.6;
+      line-height: 1.5;
       min-width: 0;
     }
 
     textarea::placeholder { color: var(--text-muted); }
 
     .icon-btn {
-      width: 44px;
-      height: 44px;
+      width: 42px;
+      height: 42px;
       border-radius: var(--radius-md);
       border: 1px solid var(--border-light);
       cursor: pointer;
       display: grid;
       place-items: center;
-      font-size: 18px;
+      font-size: 17px;
       flex-shrink: 0;
       transition: all 0.2s ease;
       background: var(--bg-soft);
@@ -876,29 +806,27 @@
       background: var(--accent-soft);
       color: var(--blue-2);
       border-color: var(--blue-3);
-      box-shadow: 0 0 24px rgba(37, 99, 235, 0.15);
-      transform: translateY(-1px);
     }
 
     .send-btn {
-      width: 44px;
-      height: 44px;
+      width: 42px;
+      height: 42px;
       border-radius: var(--radius-md);
       border: none;
       cursor: pointer;
       display: grid;
       place-items: center;
-      font-size: 18px;
+      font-size: 17px;
       flex-shrink: 0;
       color: #ffffff;
       background: linear-gradient(135deg, var(--blue-2), var(--blue-3));
       transition: all 0.2s ease;
-      box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
     }
 
     .send-btn:hover:not(:disabled) {
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 12px 32px rgba(37, 99, 235, 0.45);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(37, 99, 235, 0.45);
       background: linear-gradient(135deg, var(--blue-1), var(--blue-2));
     }
 
@@ -912,7 +840,7 @@
     .send-btn.stop {
       background: linear-gradient(135deg, #ef4444, #dc2626);
       color: #fff;
-      box-shadow: 0 8px 28px rgba(239, 68, 68, 0.4);
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
     }
 
     #fileInput { display: none; }
@@ -939,12 +867,10 @@
     .menu-btn:hover {
       border-color: var(--blue-3);
       color: var(--blue-2);
-      box-shadow: 0 0 24px rgba(37, 99, 235, 0.15);
     }
 
     /* user bubble mathjax color */
     .msg.user .bubble mjx-container { color: #ffffff; }
-    /* ai bubble math */
     .msg.ai .bubble mjx-container { color: var(--text-primary); }
 
     ::selection {
@@ -953,7 +879,7 @@
     }
 
     /* ============================================================
-       BRAND — redesigned
+       BRAND
        ============================================================ */
     .brand {
       position: relative;
@@ -987,8 +913,7 @@
       border-radius: 14px;
       display: grid;
       place-items: center;
-      background:
-        linear-gradient(140deg, #ffffff 0%, #eef4ff 45%, #dbe8ff 100%);
+      background: linear-gradient(140deg, #ffffff 0%, #eef4ff 45%, #dbe8ff 100%);
       border: 1px solid var(--border-blue);
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.9),
@@ -996,16 +921,6 @@
         0 0 0 4px rgba(37, 99, 235, 0.05);
       overflow: hidden;
       transition: transform .25s ease, box-shadow .25s ease;
-    }
-
-    .brand-mark::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg,
-                  rgba(37, 99, 235, 0.10),
-                  rgba(96, 165, 250, 0.05) 50%,
-                  transparent 80%);
     }
 
     .brand-mark:hover {
@@ -1032,8 +947,7 @@
       inset: -1px;
       border-radius: inherit;
       pointer-events: none;
-      background:
-        conic-gradient(from 180deg,
+      background: conic-gradient(from 180deg,
           transparent 0deg,
           rgba(37, 99, 235, 0.55) 60deg,
           transparent 120deg,
@@ -1062,7 +976,6 @@
       font-weight: 800;
       letter-spacing: -0.4px;
       line-height: 1.1;
-      color: var(--text-primary);
       background: linear-gradient(90deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
       -webkit-background-clip: text;
       background-clip: text;
@@ -1128,7 +1041,6 @@
         grid-template-columns: 1fr;
       }
 
-      /* Sidebar slides in from left */
       .sidebar {
         position: fixed;
         top: 0;
@@ -1147,23 +1059,21 @@
         transform: translateX(0);
       }
 
-      /* Show close button on mobile */
       .sidebar-close {
         display: grid;
         place-items: center;
       }
 
-      /* Add top padding to brand so it doesn't overlap close button */
       .brand {
         padding-right: 40px;
       }
 
       .thread {
-        padding: 24px 18px 160px;
+        padding: 24px 18px 24px;
       }
 
       .composer-wrap {
-        padding: 12px 16px 22px;
+        padding: 10px 14px 14px;
       }
 
       .main-header {
@@ -1193,13 +1103,13 @@
        ============================================================ */
     @media (max-width: 600px) {
       .main-header {
-        padding: 14px 16px 12px;
+        padding: 12px 14px 10px;
       }
 
       .main-title {
         font-size: 15px;
         gap: 8px;
-        margin-left: 48px;
+        margin-left: 46px;
       }
 
       .main-sub {
@@ -1207,19 +1117,19 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        margin-left: 48px;
+        margin-left: 46px;
       }
 
       .menu-btn {
         width: 38px;
         height: 38px;
         font-size: 16px;
-        top: 12px;
-        left: 12px;
+        top: 10px;
+        left: 10px;
       }
 
       .thread {
-        padding: 16px 12px 160px;
+        padding: 16px 12px 16px;
       }
 
       .msg {
@@ -1258,17 +1168,19 @@
         max-height: 180px;
       }
 
+      /* === COMPOSER FIX FOR MOBILE === */
       .composer-wrap {
-        padding: 10px 10px 18px;
+        padding: 8px 10px 12px;
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
       }
 
       .composer {
-        border-radius: 16px;
-        padding: 10px 10px 10px 14px;
+        border-radius: 14px;
+        padding: 8px 8px 8px 12px;
       }
 
       .input-area {
-        gap: 8px;
+        gap: 6px;
       }
 
       .icon-btn {
@@ -1286,15 +1198,15 @@
       }
 
       textarea {
-        font-size: 14px;
-        padding: 8px 4px;
-        min-height: 30px;
-        max-height: 120px;
+        font-size: 16px; /* Prevents iOS auto-zoom */
+        padding: 8px 2px;
+        min-height: 28px;
+        max-height: 100px;
       }
 
       .badge-row {
         gap: 6px;
-        padding: 0 0 8px;
+        padding: 0 0 6px;
       }
 
       .file-badge {
@@ -1303,13 +1215,13 @@
       }
 
       #imagePreview {
-        max-width: 90px;
-        max-height: 90px;
-        margin-bottom: 8px;
+        max-width: 80px;
+        max-height: 80px;
+        margin-bottom: 6px;
       }
 
       .empty {
-        padding: 40px 12px;
+        padding: 30px 12px;
       }
 
       .empty-icon {
@@ -1346,20 +1258,6 @@
         margin-bottom: 2px;
       }
 
-      .extract-box {
-        margin-top: 10px;
-      }
-
-      .extract-head {
-        padding: 10px 12px;
-        font-size: 11px;
-      }
-
-      .extract-body pre {
-        padding: 12px 14px;
-        font-size: 10.5px;
-      }
-
       .msg-tools {
         opacity: 1;
         gap: 6px;
@@ -1380,7 +1278,7 @@
         height: 14px;
       }
 
-      /* Sidebar mobile adjustments */
+      /* Sidebar */
       .sidebar {
         padding: 20px 16px;
         width: 280px;
@@ -1443,23 +1341,24 @@
     @media (max-width: 400px) {
       .main-title {
         font-size: 14px;
-        margin-left: 44px;
+        margin-left: 42px;
       }
 
       .main-sub {
-        margin-left: 44px;
+        margin-left: 42px;
+        font-size: 10px;
       }
 
       .menu-btn {
-        width: 36px;
-        height: 36px;
+        width: 34px;
+        height: 34px;
         font-size: 15px;
-        top: 10px;
-        left: 10px;
+        top: 9px;
+        left: 9px;
       }
 
       .thread {
-        padding: 12px 8px 150px;
+        padding: 12px 8px 12px;
       }
 
       .avatar {
@@ -1485,12 +1384,13 @@
       }
 
       .composer-wrap {
-        padding: 8px 6px 14px;
+        padding: 6px 8px 10px;
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
       }
 
       .composer {
-        padding: 8px 8px 8px 10px;
-        border-radius: 14px;
+        padding: 6px 6px 6px 10px;
+        border-radius: 12px;
       }
 
       .icon-btn,
@@ -1502,10 +1402,10 @@
       }
 
       textarea {
-        font-size: 13px;
+        font-size: 16px;
         padding: 6px 2px;
-        min-height: 26px;
-        max-height: 100px;
+        min-height: 24px;
+        max-height: 80px;
       }
 
       .empty h2 {
@@ -1562,87 +1462,41 @@
       }
     }
 
-    /* Prevent zoom on input focus for iOS */
-    @media screen and (-webkit-min-device-pixel-ratio: 0) {
-      select,
-      textarea,
-      input {
-        font-size: 16px;
-      }
-    }
-
-    /* Better tap targets for mobile */
-    @media (max-width: 900px) {
-      button,
-      .suggestion,
-      .side-toggle,
-      .new-chat-btn {
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
-      }
-
-      .suggestion:active {
-        transform: scale(0.98);
-        background: var(--bg-elevated);
-      }
-
-      .new-chat-btn:active {
-        transform: scale(0.98);
-      }
-
-      .icon-btn:active,
-      .send-btn:active {
-        transform: scale(0.95);
-      }
-
-      .tool-btn:active {
-        background: var(--accent-soft);
-        color: var(--blue-2);
-      }
-    }
-
-    /* Safe area for notched devices */
-    @supports (padding: max(0px)) {
-      .composer-wrap {
-        padding-bottom: max(18px, env(safe-area-inset-bottom));
-      }
-
-      @media (max-width: 900px) {
-        .composer-wrap {
-          padding-bottom: max(14px, env(safe-area-inset-bottom));
-        }
-
-        .sidebar {
-          padding-bottom: max(20px, env(safe-area-inset-bottom));
-        }
-      }
-    }
-
-    /* Landscape phone adjustments */
+    /* ============================================================
+       LANDSCAPE PHONE — keep composer visible
+       ============================================================ */
     @media (max-height: 500px) and (orientation: landscape) {
+      .main-header {
+        padding: 8px 16px 6px;
+      }
+
+      .main-sub {
+        display: none;
+      }
+
       .thread {
-        padding-bottom: 100px;
+        padding: 10px 14px 10px;
       }
 
       .empty {
-        padding: 20px 12px;
+        padding: 16px 12px;
       }
 
       .empty-icon {
-        width: 48px;
-        height: 48px;
-        font-size: 22px;
-        margin-bottom: 12px;
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        margin-bottom: 10px;
       }
 
       .empty h2 {
-        font-size: 16px;
+        font-size: 15px;
         margin-bottom: 4px;
       }
 
       .empty p {
         font-size: 11px;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
       }
 
       .suggestions {
@@ -1658,21 +1512,46 @@
       .suggestion b {
         font-size: 11px;
       }
+
+      .composer-wrap {
+        padding: 6px 12px 8px;
+      }
+
+      textarea {
+        max-height: 60px;
+      }
     }
 
-    /* Smooth scroll for mobile */
+    /* Prevent zoom on input focus for iOS */
+    @media screen and (-webkit-min-device-pixel-ratio: 0) {
+      select,
+      textarea,
+      input {
+        font-size: 16px;
+      }
+    }
+
+    /* Better tap targets */
     @media (max-width: 900px) {
-      .thread {
-        -webkit-overflow-scrolling: touch;
+      button,
+      .suggestion,
+      .side-toggle,
+      .new-chat-btn {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
       }
+    }
 
-      .thread::-webkit-scrollbar {
-        width: 4px;
-      }
+    /* Safe area for notched devices */
+    @supports (padding: max(0px)) {
+      @media (max-width: 900px) {
+        .composer-wrap {
+          padding-bottom: max(12px, env(safe-area-inset-bottom));
+        }
 
-      .thread::-webkit-scrollbar-thumb {
-        background: rgba(37, 99, 235, 0.2);
-        border-radius: 4px;
+        .sidebar {
+          padding-bottom: max(20px, env(safe-area-inset-bottom));
+        }
       }
     }
 
@@ -1691,7 +1570,6 @@
 
   <!-- ========================= SIDEBAR ========================= -->
   <aside class="sidebar" id="sidebar">
-    <!-- Close button (visible only on mobile) -->
     <button class="sidebar-close" onclick="toggleSidebar()" title="Close menu">✕</button>
 
     <div class="brand">
@@ -1797,14 +1675,12 @@
   const sidebarOverlay = document.getElementById('sidebarOverlay');
 
   // ============================================================
-  // SIDEBAR TOGGLE (with body lock)
+  // SIDEBAR TOGGLE
   // ============================================================
   let scrollPosition = 0;
 
   function toggleSidebar() {
-    const isOpen = sidebar.classList.contains('open');
-
-    if (isOpen) {
+    if (sidebar.classList.contains('open')) {
       closeSidebar();
     } else {
       openSidebar();
@@ -1812,12 +1688,9 @@
   }
 
   function openSidebar() {
-    // Save scroll position
     scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-    // Lock body scroll
     document.body.style.top = `-${scrollPosition}px`;
     document.body.classList.add('sidebar-locked');
-
     sidebar.classList.add('open');
     sidebarOverlay.classList.add('active');
   }
@@ -1825,24 +1698,19 @@
   function closeSidebar() {
     sidebar.classList.remove('open');
     sidebarOverlay.classList.remove('active');
-
-    // Unlock body scroll
     document.body.classList.remove('sidebar-locked');
     document.body.style.top = '';
     window.scrollTo(0, scrollPosition);
   }
 
-  // Close sidebar when overlay is clicked
   sidebarOverlay.addEventListener('click', closeSidebar);
 
-  // Close sidebar on Escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && sidebar.classList.contains('open')) {
       closeSidebar();
     }
   });
 
-  // Close sidebar when window resizes above mobile breakpoint
   window.addEventListener('resize', () => {
     if (window.innerWidth > 900 && sidebar.classList.contains('open')) {
       closeSidebar();
@@ -1952,7 +1820,7 @@
     queryInput.value = title + ': ';
     queryInput.focus();
     queryInput.style.height = 'auto';
-    queryInput.style.height = Math.min(queryInput.scrollHeight, 180) + 'px';
+    queryInput.style.height = Math.min(queryInput.scrollHeight, 160) + 'px';
   }
 
   function removeEmptyState() {
@@ -2180,7 +2048,6 @@
     queryInput.style.height = 'auto';
     renderEmptyState();
 
-    // Close sidebar on mobile after starting new chat
     if (window.innerWidth <= 900 && sidebar.classList.contains('open')) {
       closeSidebar();
     }
@@ -2195,7 +2062,7 @@
 
   queryInput.addEventListener('input', function () {
     this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 180) + 'px';
+    this.style.height = Math.min(this.scrollHeight, 160) + 'px';
   });
 
   (async () => {
