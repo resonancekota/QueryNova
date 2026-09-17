@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Blue Gradient · AI Document Assistant</title>
+  <title>AI Smart Assistant</title>
 
   <!-- MathJax 3 + mhchem -->
   <script>
@@ -1136,13 +1136,16 @@
     </div>
 
     <div class="side-info">
-      <b>supports</b><br>
-      → text<br>
-      → images<br>
-      → pdf (ocr + vision)<br>
-      <b>renders</b><br>
-      → mhchem equations
-    </div>
+  <b>supports</b><br>
+  → text<br>
+  → images<br>
+  → pdf, docx, csv (ocr + vision)<br>
+  → code & markdown<br>
+  <b>can do</b><br>
+  → write · code · research<br>
+  → translate · summarise<br>
+  → brainstorm · plan
+</div>
   </aside>
 
   <!-- ========================= MAIN ========================= -->
@@ -1153,9 +1156,9 @@
     <div class="main-header">
       <div class="main-title">
         <span class="status-dot"></span>
-        AI Document Assistant
+        AI Smart Assistant
       </div>
-      <div class="main-sub">Smart AI for your everyday tasks.</div>
+      <div class="main-sub">Your smart AI companion for writing, learning, and getting things done.</div>
     </div>
 
     <div class="thread" id="thread">
@@ -1282,25 +1285,25 @@
   // ============================================================
   function renderEmptyState() {
     thread.innerHTML = `
-      <div class="empty" id="emptyState">
-        <div class="empty-icon">⚗</div>
-        <h2>How can I help with your document?</h2>
-        <p>Upload a chemistry PDF, a photo of a textbook page, or just ask a question. Equations render properly with mhchem.</p>
-        <div class="suggestions">
-          <button class="suggestion" onclick="useSuggestion(this)">
-            <b>Extract equations</b>Pull every chemical equation from an uploaded PDF
-          </button>
-          <button class="suggestion" onclick="useSuggestion(this)">
-            <b>Explain a reaction</b>Walk me through the mechanism step by step
-          </button>
-          <button class="suggestion" onclick="useSuggestion(this)">
-            <b>Balance an equation</b>Balance and show states of matter
-          </button>
-          <button class="suggestion" onclick="useSuggestion(this)">
-            <b>Summarise a chapter</b>Give me the key points from this PDF
-          </button>
-        </div>
-      </div>
+    <div class="empty" id="emptyState">
+  <div class="empty-icon">✦</div>
+  <h2>How can I help you today?</h2>
+  <p>Ask anything, upload any file, or start with an idea. From writing and coding to research and creativity — I've got you covered.</p>
+  <div class="suggestions">
+    <button class="suggestion" onclick="useSuggestion(this)">
+      <b>Write something</b>Draft an email, essay, post, or story in seconds
+    </button>
+    <button class="suggestion" onclick="useSuggestion(this)">
+      <b>Summarise a file</b>Upload a PDF, image, or doc and get the key points
+    </button>
+    <button class="suggestion" onclick="useSuggestion(this)">
+      <b>Write or fix code</b>Generate, explain, or debug code in any language
+    </button>
+    <button class="suggestion" onclick="useSuggestion(this)">
+      <b>Answer a question</b>Ask me anything — facts, ideas, or how-to
+    </button>
+  </div>
+</div>
     `;
   }
 
@@ -1408,19 +1411,19 @@
     scrollToBottom();
   }
 
-  function makeExtractBox(label, content) {
-    const safe = escapeHtml(content || '(empty)');
-    const id = 'ex-' + Math.random().toString(36).slice(2, 9);
-    return `
-      <div class="extract-box" id="${id}">
-        <div class="extract-head" onclick="document.getElementById('${id}').classList.toggle('open')">
-          <span class="left">▸ ${escapeHtml(label)}</span>
-          <span class="chev">▶</span>
-        </div>
-        <div class="extract-body"><pre>${safe}</pre></div>
-      </div>
-    `;
-  }
+  // function makeExtractBox(label, content) {
+  //   const safe = escapeHtml(content || '(empty)');
+  //   const id = 'ex-' + Math.random().toString(36).slice(2, 9);
+  //   return `
+  //     <div class="extract-box" id="${id}">
+  //       <div class="extract-head" onclick="document.getElementById('${id}').classList.toggle('open')">
+  //         <span class="left">▸ ${escapeHtml(label)}</span>
+  //         <span class="chev">▶</span>
+  //       </div>
+  //       <div class="extract-body"><pre>${safe}</pre></div>
+  //     </div>
+  //   `;
+  // }
 
   // ============================================================
   // SEND
@@ -1506,14 +1509,14 @@
 
       let html = escapeHtml(answer).replace(/\n/g, '<br>');
 
-      if (extractedPreview && extractedPreview.trim().length > 0) {
-        html += makeExtractBox(
-          'extracted text from document',
-          extractedPreview.length > 4000
-            ? extractedPreview.slice(0, 4000) + '\n…[truncated]'
-            : extractedPreview
-        );
-      }
+      // if (extractedPreview && extractedPreview.trim().length > 0) {
+      //   html += makeExtractBox(
+      //     'extracted text from document',
+      //     extractedPreview.length > 4000
+      //       ? extractedPreview.slice(0, 4000) + '\n…[truncated]'
+      //       : extractedPreview
+      //   );
+      // }
 
       setAIBubbleContent(bubble, tools, html, answer);
 
