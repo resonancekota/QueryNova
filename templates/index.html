@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes">
   <title>AI Smart Assistant</title>
 
   <!-- MathJax 3 + mhchem -->
@@ -138,7 +138,34 @@
       flex-direction: column;
       gap: 16px;
       overflow-y: auto;
-      transition: transform 0.25s ease;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 300;
+    }
+
+    /* ---------- SIDEBAR CLOSE BUTTON (mobile) ---------- */
+    .sidebar-close {
+      display: none;
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      place-items: center;
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+
+    .sidebar-close:hover {
+      background: #fee2e2;
+      color: #dc2626;
+      border-color: #fecaca;
     }
 
     .brand {
@@ -280,6 +307,7 @@
       position: relative;
       overflow: hidden;
       background: transparent;
+      min-width: 0;
     }
 
     .main-header {
@@ -309,6 +337,7 @@
       background: var(--blue-2);
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12), 0 0 14px var(--blue-2);
       animation: pulseGlow 2s ease-in-out infinite;
+      flex-shrink: 0;
     }
 
     @keyframes pulseGlow {
@@ -501,6 +530,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      min-width: 0;
     }
 
     .msg.user .bubble-wrap { align-items: flex-end; }
@@ -822,6 +852,7 @@
       color: var(--text-primary);
       caret-color: var(--blue-2);
       line-height: 1.6;
+      min-width: 0;
     }
 
     textarea::placeholder { color: var(--text-muted); }
@@ -886,29 +917,7 @@
 
     #fileInput { display: none; }
 
-    /* ---------- RESPONSIVE ---------- */
-    @media (max-width: 900px) {
-      .app { grid-template-columns: 1fr; }
-
-      .sidebar {
-        display: none;
-        position: fixed;
-        inset: 0 auto 0 0;
-        width: 280px;
-        z-index: 200;
-        box-shadow: 24px 0 70px rgba(30, 64, 175, 0.15);
-        border-right: 1px solid var(--border-mid);
-      }
-
-      .sidebar.open { display: flex; }
-
-      .thread { padding: 24px 18px 160px; }
-      .composer-wrap { padding: 12px 16px 22px; }
-      .main-header { padding: 16px 20px 14px; }
-      .suggestions { grid-template-columns: 1fr; }
-      .empty h2 { font-size: 20px; }
-    }
-
+    /* ---------- MENU BUTTON ---------- */
     .menu-btn {
       display: none;
       position: absolute;
@@ -933,11 +942,6 @@
       box-shadow: 0 0 24px rgba(37, 99, 235, 0.15);
     }
 
-    @media (max-width: 900px) {
-      .menu-btn { display: grid; place-items: center; }
-      .main-title { margin-left: 52px; }
-    }
-
     /* user bubble mathjax color */
     .msg.user .bubble mjx-container { color: #ffffff; }
     /* ai bubble math */
@@ -947,163 +951,738 @@
       background: rgba(37, 99, 235, 0.2);
       color: var(--text-primary);
     }
+
     /* ============================================================
-   BRAND — redesigned
-   ============================================================ */
-.brand {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 4px 4px 22px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--border-light);
-}
+       BRAND — redesigned
+       ============================================================ */
+    .brand {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 4px 4px 22px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border-light);
+    }
 
-/* soft glow behind the brand */
-.brand::after {
-  content: "";
-  position: absolute;
-  left: -20px;
-  top: -10px;
-  width: 140px;
-  height: 80px;
-  background: radial-gradient(circle at 30% 40%,
-              rgba(37, 99, 235, 0.10), transparent 70%);
-  filter: blur(8px);
-  pointer-events: none;
-  z-index: -1;
-}
+    .brand::after {
+      content: "";
+      position: absolute;
+      left: -20px;
+      top: -10px;
+      width: 140px;
+      height: 80px;
+      background: radial-gradient(circle at 30% 40%,
+                  rgba(37, 99, 235, 0.10), transparent 70%);
+      filter: blur(8px);
+      pointer-events: none;
+      z-index: -1;
+    }
 
-/* ---- mark ---- */
-.brand-mark {
-  position: relative;
-  width: 46px;
-  height: 46px;
-  flex-shrink: 0;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  background:
-    linear-gradient(140deg, #ffffff 0%, #eef4ff 45%, #dbe8ff 100%);
-  border: 1px solid var(--border-blue);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 6px 18px rgba(37, 99, 235, 0.18),
-    0 0 0 4px rgba(37, 99, 235, 0.05);
-  overflow: hidden;
-  transition: transform .25s ease, box-shadow .25s ease;
-}
+    .brand-mark {
+      position: relative;
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(140deg, #ffffff 0%, #eef4ff 45%, #dbe8ff 100%);
+      border: 1px solid var(--border-blue);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 6px 18px rgba(37, 99, 235, 0.18),
+        0 0 0 4px rgba(37, 99, 235, 0.05);
+      overflow: hidden;
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
 
-.brand-mark::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg,
-              rgba(37, 99, 235, 0.10),
-              rgba(96, 165, 250, 0.05) 50%,
-              transparent 80%);
-}
+    .brand-mark::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg,
+                  rgba(37, 99, 235, 0.10),
+                  rgba(96, 165, 250, 0.05) 50%,
+                  transparent 80%);
+    }
 
-.brand-mark:hover {
-  transform: translateY(-1px) rotate(-2deg);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 10px 26px rgba(37, 99, 235, 0.28),
-    0 0 0 6px rgba(37, 99, 235, 0.06);
-}
+    .brand-mark:hover {
+      transform: translateY(-1px) rotate(-2deg);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 10px 26px rgba(37, 99, 235, 0.28),
+        0 0 0 6px rgba(37, 99, 235, 0.06);
+    }
 
-.brand-glyph {
-  position: relative;
-  font-size: 22px;
-  line-height: 1;
-  background: linear-gradient(135deg, var(--blue-1), var(--blue-3));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 1px 1px rgba(37, 99, 235, 0.25));
-}
+    .brand-glyph {
+      position: relative;
+      font-size: 22px;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--blue-1), var(--blue-3));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 1px 1px rgba(37, 99, 235, 0.25));
+    }
 
-/* orbiting halo dot */
-.brand-orbit {
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    conic-gradient(from 180deg,
-      transparent 0deg,
-      rgba(37, 99, 235, 0.55) 60deg,
-      transparent 120deg,
-      transparent 360deg);
-  mask: radial-gradient(farthest-side,
-        transparent calc(100% - 2px), #000 calc(100% - 1px));
-  -webkit-mask: radial-gradient(farthest-side,
-        transparent calc(100% - 2px), #000 calc(100% - 1px));
-  animation: orbit 6s linear infinite;
-  opacity: 0.85;
-}
+    .brand-orbit {
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      pointer-events: none;
+      background:
+        conic-gradient(from 180deg,
+          transparent 0deg,
+          rgba(37, 99, 235, 0.55) 60deg,
+          transparent 120deg,
+          transparent 360deg);
+      mask: radial-gradient(farthest-side,
+            transparent calc(100% - 2px), #000 calc(100% - 1px));
+      -webkit-mask: radial-gradient(farthest-side,
+            transparent calc(100% - 2px), #000 calc(100% - 1px));
+      animation: orbit 6s linear infinite;
+      opacity: 0.85;
+    }
 
-@keyframes orbit {
-  to { transform: rotate(360deg); }
-}
+    @keyframes orbit {
+      to { transform: rotate(360deg); }
+    }
 
-/* ---- text ---- */
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
 
-.brand-name {
-  font-size: 15.5px;
-  font-weight: 800;
-  letter-spacing: -0.4px;
-  line-height: 1.1;
-  color: var(--text-primary);
-  background: linear-gradient(90deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  white-space: nowrap;
-}
+    .brand-name {
+      font-size: 15.5px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      line-height: 1.1;
+      color: var(--text-primary);
+      background: linear-gradient(90deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      white-space: nowrap;
+    }
 
-.brand-sub {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  white-space: nowrap;
-}
+    .brand-sub {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      white-space: nowrap;
+    }
 
-/* pulsing status dot before subtitle */
-.brand-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--blue-3);
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12), 0 0 10px var(--blue-3);
-  animation: brandPulse 2s ease-in-out infinite;
-  flex-shrink: 0;
-}
+    .brand-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--blue-3);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12), 0 0 10px var(--blue-3);
+      animation: brandPulse 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
 
-@keyframes brandPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.5; transform: scale(0.85); }
-}
+    @keyframes brandPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(0.85); }
+    }
 
-/* subtle responsive tweak */
-@media (max-width: 900px) {
-  .brand-mark { width: 42px; height: 42px; border-radius: 12px; }
-  .brand-glyph { font-size: 20px; }
-  .brand-name { font-size: 14.5px; }
-}
+    /* ============================================================
+       SIDEBAR OVERLAY (mobile)
+       ============================================================ */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.35);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      z-index: 250;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .sidebar-overlay.active {
+      display: block;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ============================================================
+       RESPONSIVE — TABLET & MOBILE
+       ============================================================ */
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      /* Sidebar slides in from left */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 290px;
+        max-width: 85vw;
+        display: flex;
+        transform: translateX(-100%);
+        box-shadow: 24px 0 70px rgba(30, 64, 175, 0.15);
+        border-right: 1px solid var(--border-mid);
+        padding: 24px 18px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      /* Show close button on mobile */
+      .sidebar-close {
+        display: grid;
+        place-items: center;
+      }
+
+      /* Add top padding to brand so it doesn't overlap close button */
+      .brand {
+        padding-right: 40px;
+      }
+
+      .thread {
+        padding: 24px 18px 160px;
+      }
+
+      .composer-wrap {
+        padding: 12px 16px 22px;
+      }
+
+      .main-header {
+        padding: 16px 20px 14px;
+      }
+
+      .suggestions {
+        grid-template-columns: 1fr;
+      }
+
+      .empty h2 {
+        font-size: 20px;
+      }
+
+      .menu-btn {
+        display: grid;
+        place-items: center;
+      }
+
+      .main-title {
+        margin-left: 52px;
+      }
+    }
+
+    /* ============================================================
+       MOBILE — SMALL SCREENS (≤600px)
+       ============================================================ */
+    @media (max-width: 600px) {
+      .main-header {
+        padding: 14px 16px 12px;
+      }
+
+      .main-title {
+        font-size: 15px;
+        gap: 8px;
+        margin-left: 48px;
+      }
+
+      .main-sub {
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-left: 48px;
+      }
+
+      .menu-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+        top: 12px;
+        left: 12px;
+      }
+
+      .thread {
+        padding: 16px 12px 160px;
+      }
+
+      .msg {
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
+        border-radius: 10px;
+      }
+
+      .bubble-wrap {
+        max-width: calc(100% - 54px);
+      }
+
+      .bubble {
+        padding: 12px 14px;
+        font-size: 13.5px;
+        line-height: 1.7;
+        border-radius: 14px;
+      }
+
+      .msg.user .bubble {
+        border-bottom-right-radius: 5px;
+      }
+
+      .msg.ai .bubble {
+        border-bottom-left-radius: 5px;
+      }
+
+      .bubble-img {
+        max-width: 200px;
+        max-height: 180px;
+      }
+
+      .composer-wrap {
+        padding: 10px 10px 18px;
+      }
+
+      .composer {
+        border-radius: 16px;
+        padding: 10px 10px 10px 14px;
+      }
+
+      .input-area {
+        gap: 8px;
+      }
+
+      .icon-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 15px;
+        border-radius: 10px;
+      }
+
+      .send-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 15px;
+        border-radius: 10px;
+      }
+
+      textarea {
+        font-size: 14px;
+        padding: 8px 4px;
+        min-height: 30px;
+        max-height: 120px;
+      }
+
+      .badge-row {
+        gap: 6px;
+        padding: 0 0 8px;
+      }
+
+      .file-badge {
+        font-size: 11px;
+        padding: 5px 10px 5px 12px;
+      }
+
+      #imagePreview {
+        max-width: 90px;
+        max-height: 90px;
+        margin-bottom: 8px;
+      }
+
+      .empty {
+        padding: 40px 12px;
+      }
+
+      .empty-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 28px;
+        border-radius: 20px;
+        margin-bottom: 18px;
+      }
+
+      .empty h2 {
+        font-size: 18px;
+        margin-bottom: 6px;
+      }
+
+      .empty p {
+        font-size: 13px;
+        margin-bottom: 22px;
+        line-height: 1.6;
+      }
+
+      .suggestions {
+        gap: 8px;
+      }
+
+      .suggestion {
+        padding: 12px 14px;
+        font-size: 12px;
+        border-radius: 10px;
+      }
+
+      .suggestion b {
+        font-size: 12.5px;
+        margin-bottom: 2px;
+      }
+
+      .extract-box {
+        margin-top: 10px;
+      }
+
+      .extract-head {
+        padding: 10px 12px;
+        font-size: 11px;
+      }
+
+      .extract-body pre {
+        padding: 12px 14px;
+        font-size: 10.5px;
+      }
+
+      .msg-tools {
+        opacity: 1;
+        gap: 6px;
+      }
+
+      .tool-btn {
+        padding: 5px 10px;
+        font-size: 10px;
+      }
+
+      .extract-status {
+        font-size: 12px;
+        gap: 8px;
+      }
+
+      .spinner {
+        width: 14px;
+        height: 14px;
+      }
+
+      /* Sidebar mobile adjustments */
+      .sidebar {
+        padding: 20px 16px;
+        width: 280px;
+      }
+
+      .sidebar-close {
+        top: 14px;
+        right: 14px;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+      }
+
+      .brand {
+        padding-right: 36px;
+        gap: 12px;
+      }
+
+      .brand-mark {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+      }
+
+      .brand-glyph {
+        font-size: 19px;
+      }
+
+      .brand-name {
+        font-size: 14px;
+      }
+
+      .brand-sub {
+        font-size: 9px;
+        letter-spacing: 1px;
+      }
+
+      .new-chat-btn {
+        padding: 11px 14px;
+        font-size: 12.5px;
+        border-radius: 10px;
+      }
+
+      .side-toggle {
+        padding: 11px 14px;
+        font-size: 12px;
+        border-radius: 10px;
+      }
+
+      .side-info {
+        font-size: 10.5px;
+        line-height: 1.8;
+        padding: 14px 6px 4px;
+      }
+    }
+
+    /* ============================================================
+       EXTRA SMALL (≤400px)
+       ============================================================ */
+    @media (max-width: 400px) {
+      .main-title {
+        font-size: 14px;
+        margin-left: 44px;
+      }
+
+      .main-sub {
+        margin-left: 44px;
+      }
+
+      .menu-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 15px;
+        top: 10px;
+        left: 10px;
+      }
+
+      .thread {
+        padding: 12px 8px 150px;
+      }
+
+      .avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+        border-radius: 8px;
+      }
+
+      .bubble-wrap {
+        max-width: calc(100% - 44px);
+      }
+
+      .bubble {
+        padding: 10px 12px;
+        font-size: 12.5px;
+        border-radius: 12px;
+      }
+
+      .bubble-img {
+        max-width: 160px;
+        max-height: 150px;
+      }
+
+      .composer-wrap {
+        padding: 8px 6px 14px;
+      }
+
+      .composer {
+        padding: 8px 8px 8px 10px;
+        border-radius: 14px;
+      }
+
+      .icon-btn,
+      .send-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 13px;
+        border-radius: 8px;
+      }
+
+      textarea {
+        font-size: 13px;
+        padding: 6px 2px;
+        min-height: 26px;
+        max-height: 100px;
+      }
+
+      .empty h2 {
+        font-size: 16px;
+      }
+
+      .empty p {
+        font-size: 12px;
+      }
+
+      .suggestion {
+        padding: 10px 12px;
+        font-size: 11.5px;
+      }
+
+      .suggestion b {
+        font-size: 12px;
+      }
+
+      .sidebar {
+        width: 260px;
+        padding: 18px 14px;
+      }
+
+      .sidebar-close {
+        top: 12px;
+        right: 12px;
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+      }
+
+      .brand {
+        padding-right: 34px;
+        gap: 10px;
+      }
+
+      .brand-mark {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+      }
+
+      .brand-glyph {
+        font-size: 17px;
+      }
+
+      .brand-name {
+        font-size: 13px;
+      }
+
+      .brand-sub {
+        font-size: 8.5px;
+      }
+    }
+
+    /* Prevent zoom on input focus for iOS */
+    @media screen and (-webkit-min-device-pixel-ratio: 0) {
+      select,
+      textarea,
+      input {
+        font-size: 16px;
+      }
+    }
+
+    /* Better tap targets for mobile */
+    @media (max-width: 900px) {
+      button,
+      .suggestion,
+      .side-toggle,
+      .new-chat-btn {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+
+      .suggestion:active {
+        transform: scale(0.98);
+        background: var(--bg-elevated);
+      }
+
+      .new-chat-btn:active {
+        transform: scale(0.98);
+      }
+
+      .icon-btn:active,
+      .send-btn:active {
+        transform: scale(0.95);
+      }
+
+      .tool-btn:active {
+        background: var(--accent-soft);
+        color: var(--blue-2);
+      }
+    }
+
+    /* Safe area for notched devices */
+    @supports (padding: max(0px)) {
+      .composer-wrap {
+        padding-bottom: max(18px, env(safe-area-inset-bottom));
+      }
+
+      @media (max-width: 900px) {
+        .composer-wrap {
+          padding-bottom: max(14px, env(safe-area-inset-bottom));
+        }
+
+        .sidebar {
+          padding-bottom: max(20px, env(safe-area-inset-bottom));
+        }
+      }
+    }
+
+    /* Landscape phone adjustments */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .thread {
+        padding-bottom: 100px;
+      }
+
+      .empty {
+        padding: 20px 12px;
+      }
+
+      .empty-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
+        margin-bottom: 12px;
+      }
+
+      .empty h2 {
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+
+      .empty p {
+        font-size: 11px;
+        margin-bottom: 14px;
+      }
+
+      .suggestions {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+      }
+
+      .suggestion {
+        padding: 8px 10px;
+        font-size: 10.5px;
+      }
+
+      .suggestion b {
+        font-size: 11px;
+      }
+    }
+
+    /* Smooth scroll for mobile */
+    @media (max-width: 900px) {
+      .thread {
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .thread::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      .thread::-webkit-scrollbar-thumb {
+        background: rgba(37, 99, 235, 0.2);
+        border-radius: 4px;
+      }
+    }
+
+    /* Prevent body scroll when sidebar open */
+    body.sidebar-locked {
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+    }
   </style>
 </head>
 <body>
@@ -1112,19 +1691,22 @@
 
   <!-- ========================= SIDEBAR ========================= -->
   <aside class="sidebar" id="sidebar">
- <div class="brand">
-  <div class="brand-mark">
-    <span class="brand-glyph">⚗</span>
-    <span class="brand-orbit"></span>
-  </div>
-  <div class="brand-text">
-    <div class="brand-name">SKR </div>
-    <div class="brand-sub">
-      <span class="brand-dot"></span>
-   Full-Stack &amp; Application <br>Developer
+    <!-- Close button (visible only on mobile) -->
+    <button class="sidebar-close" onclick="toggleSidebar()" title="Close menu">✕</button>
+
+    <div class="brand">
+      <div class="brand-mark">
+        <span class="brand-glyph">⚗</span>
+        <span class="brand-orbit"></span>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">SKR</div>
+        <div class="brand-sub">
+          <span class="brand-dot"></span>
+          Full-Stack &amp; Application <br>Developer
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
     <button class="new-chat-btn" onclick="newChat()">
       <span>＋</span> New Chat
@@ -1136,17 +1718,20 @@
     </div>
 
     <div class="side-info">
-  <b>supports</b><br>
-  → text<br>
-  → images<br>
-  → pdf, docx, csv (ocr + vision)<br>
-  → code & markdown<br>
-  <b>can do</b><br>
-  → write · code · research<br>
-  → translate · summarise<br>
-  → brainstorm · plan
-</div>
+      <b>supports</b><br>
+      → text<br>
+      → images<br>
+      → pdf, docx, csv (ocr + vision)<br>
+      → code & markdown<br>
+      <b>can do</b><br>
+      → write · code · research<br>
+      → translate · summarise<br>
+      → brainstorm · plan
+    </div>
   </aside>
+
+  <!-- Mobile sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- ========================= MAIN ========================= -->
   <main class="main">
@@ -1209,9 +1794,72 @@
   const webToggle = document.getElementById('webToggle');
   const webState = document.getElementById('webState');
   const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
 
   // ============================================================
-  // UTIL
+  // SIDEBAR TOGGLE (with body lock)
+  // ============================================================
+  let scrollPosition = 0;
+
+  function toggleSidebar() {
+    const isOpen = sidebar.classList.contains('open');
+
+    if (isOpen) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  }
+
+  function openSidebar() {
+    // Save scroll position
+    scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+    // Lock body scroll
+    document.body.style.top = `-${scrollPosition}px`;
+    document.body.classList.add('sidebar-locked');
+
+    sidebar.classList.add('open');
+    sidebarOverlay.classList.add('active');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('active');
+
+    // Unlock body scroll
+    document.body.classList.remove('sidebar-locked');
+    document.body.style.top = '';
+    window.scrollTo(0, scrollPosition);
+  }
+
+  // Close sidebar when overlay is clicked
+  sidebarOverlay.addEventListener('click', closeSidebar);
+
+  // Close sidebar on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+      closeSidebar();
+    }
+  });
+
+  // Close sidebar when window resizes above mobile breakpoint
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 900 && sidebar.classList.contains('open')) {
+      closeSidebar();
+    }
+  });
+
+  // ============================================================
+  // WEB SEARCH TOGGLE
+  // ============================================================
+  function toggleWeb() {
+    webSearch = !webSearch;
+    webState.textContent = webSearch ? 'ON' : 'OFF';
+    webToggle.classList.toggle('active', webSearch);
+  }
+
+  // ============================================================
+  // UTILITIES
   // ============================================================
   function escapeHtml(s) {
     return String(s)
@@ -1230,14 +1878,6 @@
     requestAnimationFrame(() => {
       thread.scrollTop = thread.scrollHeight;
     });
-  }
-
-  function toggleSidebar() { sidebar.classList.toggle('open'); }
-
-  function toggleWeb() {
-    webSearch = !webSearch;
-    webState.textContent = webSearch ? 'ON' : 'OFF';
-    webToggle.classList.toggle('active', webSearch);
   }
 
   // ============================================================
@@ -1286,24 +1926,24 @@
   function renderEmptyState() {
     thread.innerHTML = `
     <div class="empty" id="emptyState">
-  <div class="empty-icon">✦</div>
-  <h2>How can I help you today?</h2>
-  <p>Ask anything, upload any file, or start with an idea. From writing and coding to research and creativity — I've got you covered.</p>
-  <div class="suggestions">
-    <button class="suggestion" onclick="useSuggestion(this)">
-      <b>Write something</b>Draft an email, essay, post, or story in seconds
-    </button>
-    <button class="suggestion" onclick="useSuggestion(this)">
-      <b>Summarise a file</b>Upload a PDF, image, or doc and get the key points
-    </button>
-    <button class="suggestion" onclick="useSuggestion(this)">
-      <b>Write or fix code</b>Generate, explain, or debug code in any language
-    </button>
-    <button class="suggestion" onclick="useSuggestion(this)">
-      <b>Answer a question</b>Ask me anything — facts, ideas, or how-to
-    </button>
-  </div>
-</div>
+      <div class="empty-icon">✦</div>
+      <h2>How can I help you today?</h2>
+      <p>Ask anything, upload any file, or start with an idea. From writing and coding to research and creativity — I've got you covered.</p>
+      <div class="suggestions">
+        <button class="suggestion" onclick="useSuggestion(this)">
+          <b>Write something</b>Draft an email, essay, post, or story in seconds
+        </button>
+        <button class="suggestion" onclick="useSuggestion(this)">
+          <b>Summarise a file</b>Upload a PDF, image, or doc and get the key points
+        </button>
+        <button class="suggestion" onclick="useSuggestion(this)">
+          <b>Write or fix code</b>Generate, explain, or debug code in any language
+        </button>
+        <button class="suggestion" onclick="useSuggestion(this)">
+          <b>Answer a question</b>Ask me anything — facts, ideas, or how-to
+        </button>
+      </div>
+    </div>
     `;
   }
 
@@ -1411,20 +2051,6 @@
     scrollToBottom();
   }
 
-  // function makeExtractBox(label, content) {
-  //   const safe = escapeHtml(content || '(empty)');
-  //   const id = 'ex-' + Math.random().toString(36).slice(2, 9);
-  //   return `
-  //     <div class="extract-box" id="${id}">
-  //       <div class="extract-head" onclick="document.getElementById('${id}').classList.toggle('open')">
-  //         <span class="left">▸ ${escapeHtml(label)}</span>
-  //         <span class="chev">▶</span>
-  //       </div>
-  //       <div class="extract-body"><pre>${safe}</pre></div>
-  //     </div>
-  //   `;
-  // }
-
   // ============================================================
   // SEND
   // ============================================================
@@ -1509,15 +2135,6 @@
 
       let html = escapeHtml(answer).replace(/\n/g, '<br>');
 
-      // if (extractedPreview && extractedPreview.trim().length > 0) {
-      //   html += makeExtractBox(
-      //     'extracted text from document',
-      //     extractedPreview.length > 4000
-      //       ? extractedPreview.slice(0, 4000) + '\n…[truncated]'
-      //       : extractedPreview
-      //   );
-      // }
-
       setAIBubbleContent(bubble, tools, html, answer);
 
     } catch (err) {
@@ -1562,6 +2179,11 @@
     queryInput.value = '';
     queryInput.style.height = 'auto';
     renderEmptyState();
+
+    // Close sidebar on mobile after starting new chat
+    if (window.innerWidth <= 900 && sidebar.classList.contains('open')) {
+      closeSidebar();
+    }
   }
 
   queryInput.addEventListener('keydown', (e) => {
